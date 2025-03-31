@@ -1,0 +1,35 @@
+MIGRATIONS
+==========
+
+Startup Project: ComunidadeLivros.Web
+Default Project: ComunidadeLivros.Shared
+
+
+Get migrations
+--------------
+Get-Migration
+
+
+Add new migration
+-----------------
+Add-Migration NAME
+
+
+Remove migration
+----------------
+Remove-Migration
+
+
+Run migrations
+--------------
+Update-Database
+
+
+Rollback migrations
+-------------------
+Update-Database -Migration:"NAME"
+
+
+Rollback all migrations
+-----------------------
+Update-Database -Migration:0

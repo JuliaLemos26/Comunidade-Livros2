@@ -25,7 +25,7 @@ namespace ComunidadeLivros2.Services
         public async Task<IList<Livro>> GetLivrosByAutorId(Guid autorId)
         {
             return await _context.Livros
-                .Where(l => l.AutorId == autorId)
+                .Where(l => l.Autor != null && l.Autor.Id == autorId)
                 .ToListAsync();
         }
 

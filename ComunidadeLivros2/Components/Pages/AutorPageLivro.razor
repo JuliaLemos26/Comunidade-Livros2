@@ -2,27 +2,35 @@
 @inject ILivroService LivroService
 @inject IAutorService AutorService
 
-<h3>Livros de @Autor?.Nome</h3>
-<br />
 @if (Autor != null)
 {
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Nome do Livro</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var livro in livros)
-			{
+	<h3>Livros de @Autor.Nome</h3>
+	<br />
+
+	@if (Autor.Livros != null)
+	{
+		<table class="table">
+			<thead>
 				<tr>
-					<td>
-						<a href="/livro/info/@livro.Id">@livro.Name</a>
-					</td>
+					<th>Nome do Livro</th>
 				</tr>
-			}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				@foreach (var livro in Autor.Livros)
+				{
+					<tr>
+						<td>
+							<a href="/livro/info/@livro.Id">@livro.Name</a>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+	else
+	{
+		<h3>O autor @Autor.Nome não tem livros.</h3>
+	}
 }
 else
 {
@@ -30,16 +38,16 @@ else
 }
 
 @code {
-	[Parameter] public Guid AutorId { get; set; }
+	[Parameter] public string Id { get; set; }
 	private Autor? Autor = null;
-	private List<Livro> livros = new();
+	//private List<Livro> livros = new();
 
 	protected override async Task OnInitializedAsync()
 	{
-		Autor = await AutorService.GetAutorById(AutorId);
-		if (Autor != null)
-		{
-			livros = (await LivroService.GetLivrosByAutorId(AutorId)).ToList();
-		}
+		Autor = await AutorService.GetAutorById(Guid.Parse(Id));
+		// if (Autor != null)
+		// {
+		// 	livros = (await LivroService.GetLivrosByAutorId(AutorId)).ToList();
+		// }
 	}
 }

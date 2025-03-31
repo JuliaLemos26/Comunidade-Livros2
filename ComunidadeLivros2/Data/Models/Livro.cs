@@ -4,8 +4,6 @@ namespace ComunidadeLivros2.Data.Models
 {
     public class Livro
     {
-        internal Guid AutorId;
-
         public required Guid Id { get; set; }
         public required string Name { get; set; }
 
@@ -21,6 +19,5 @@ namespace ComunidadeLivros2.Data.Models
 
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public Midia? Midia { get; set; }
-
     }
 }

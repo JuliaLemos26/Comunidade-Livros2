@@ -26,6 +26,7 @@ namespace ComunidadeLivros2.Services
             return await _context.Autores
                                  .Include(x => x.Midia)
                                  .Include(x => x.Genero)
+                                 .Include(x => x.Livros)
                                  .FirstOrDefaultAsync(X => X.Id == id);
         }
 
