@@ -1,0 +1,67 @@
+﻿@page "/terror"
+@inject ILivroService LivroService
+@inject IAutorService AutorService
+
+<PageTitle>Terror</PageTitle>
+
+<h1>Terror</h1>
+
+@if (livros == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<p>Listagem de Livros de Terror</p>
+	<br />
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var livro in livros)
+			{
+				<tr>
+					<td>
+						<a href="/livro/info/@livro.Id">@livro.Name</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+	<br />
+	<br />
+	<br />
+	<p>Listagem de Autores de Terror</p>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var autor in autores)
+			{
+				<tr>
+					<td>
+						<a href="/autor/info/@autor.Id">@autor.Nome</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private List<Livro> livros = new();
+	private List<Autor> autores = new();
+	private readonly Guid GeneroId = Guid.Parse("44ba5b23-eea5-4ad4-9f58-ce808dadb8cc");
+
+	protected override async Task OnInitializedAsync()
+	{
+		livros = (await LivroService.GetLivrosByGeneroId(GeneroId)).ToList();
+		autores = (await AutorService.GetAutoresByGeneroId(GeneroId)).ToList();
+	}
+}

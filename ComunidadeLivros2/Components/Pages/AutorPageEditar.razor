@@ -1,0 +1,145 @@
+﻿@page "/editautor/{id}"
+@inject IAutorService AutorService
+@inject IGeneroService GeneroService
+@inject IMidiaService MidiaService
+@inject NavigationManager Navigation
+
+<a href="/autor" class="btn btn-secondary m-1">Voltar</a>
+
+@if (Autor == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@Autor" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Editar Autor</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Autor" class="col-sm-2 col-form-label">
+				Nome do Autor
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Autor" class="form-control" placeholder="Nome-Autor"
+						   @bind-Value="Autor.Nome" />
+				<ValidationMessage For="() => Autor.Nome" />
+			</div>
+			<label for="Sobre-Autor" class="col-sm-2 col-form-label">
+				Sobre do Autor
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Sobre-Autor" class="form-control" placeholder="Sobre-Autor"
+						   @bind-Value="Autor.Sobre" />
+				<ValidationMessage For="() => Autor.Sobre" />
+			</div>
+			<div class="col-sm-10">
+				<select id="Genero-Autor" class="form-control" placeholder="Genero-Autor" @bind="generoId">
+					<option value="">Selecione um Gênero</option>
+					@foreach (var genero in ListaGeneros)
+					{
+						<option value="@genero.Id">@genero.Nome</option>
+					}
+				</select>
+				<ValidationMessage For="() => Autor.Genero" />
+			</div>
+			<div class="col-sm-10">
+				<select id="Midia-Livro" class="form-control" placeholder="Midia-Livro" @onchange="OnMudarImagem">
+					<option value="">Selecione uma Imagem</option>
+					@foreach (var midia in ListaMidia)
+					{
+						@if (midia.Id == midiaId)
+						{
+							<option value="@midia.Id" selected>@midia.Nome</option>
+						}
+						else
+						{
+							<option value="@midia.Id">@midia.Nome</option>
+						}
+					}
+				</select>
+				<ValidationMessage For="() => Autor.Midia" />
+			</div>
+
+			@if (Autor.Midia != null)
+			{
+				<div class="col-sm-10">
+					<img src="@Autor.Midia.MidiaLink" width="250" />
+				</div>
+			}
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+			<button type="button" class="btn btn-danger m-1" @onclick="DeleteAutor">Deletar</button>
+		</div>
+
+	</EditForm>
+
+	<ConfirmDialog @ref="DeleteConfirmation" ConfirmationChanged="ConfirmDelete_Click" ConfirmationMessage=@($"Deseja eliminar o Autor \"{Autor.Nome}\"?")>
+	</ConfirmDialog>
+}
+
+@code {
+
+	public Autor? Autor { get; set; } = null;
+	protected ConfirmDialog DeleteConfirmation { get; set; } = new();
+	private IList<Genero> ListaGeneros = new List<Genero>();
+	private Guid generoId;
+	private IList<Midia> ListaMidia = new List<Midia>();
+	private Guid midiaId;
+
+	[Parameter]
+	public required string Id { get; set; }
+
+	protected async override Task OnInitializedAsync()
+	{
+		ListaGeneros = await GeneroService.GetAllGeneros();
+		ListaMidia = await MidiaService.GetAllMidia();
+		Autor = await AutorService.GetAutorById(Guid.Parse(Id));
+
+		if (Autor != null && Autor.Genero != null)
+		{
+			generoId = Autor.Genero.Id;
+		}
+	}
+
+	protected async Task OnMudarImagem(ChangeEventArgs e)
+	{
+		if (e != null && e.Value != null && Autor != null)
+		{
+			midiaId = Guid.Parse((string)e.Value);
+			Midia? midia = await MidiaService.GetMidiaById(midiaId);
+
+			Autor.Midia = midia;
+		}
+	}
+
+	private async Task Save()
+	{
+		if (Autor != null)
+		{
+			Autor.Genero = await GeneroService.GetGeneroById(generoId);
+
+			await AutorService.UpdateAutor(Autor);
+			Navigation.NavigateTo("autor");
+		}
+	}
+
+	private void DeleteAutor()
+	{
+		DeleteConfirmation.Show();
+	}
+
+	protected async Task ConfirmDelete_Click(bool deleteConfirmed)
+	{
+		if (deleteConfirmed)
+		{
+			if (Autor != null)
+			{
+				await AutorService.DeleteAutor(Autor);
+				Navigation.NavigateTo("/autor");
+			}
+		}
+	}
+}

@@ -1,0 +1,174 @@
+﻿@page "/editlivro/{id}"
+@inject ILivroService LivroService
+@inject IAutorService AutorService
+@inject IGeneroService GeneroService
+@inject IMidiaService MidiaService
+@inject NavigationManager Navigation
+
+<a href="/livro" class="btn btn-secondary m-1">Voltar</a>
+
+@if (Livro == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@Livro" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Editar Título</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Livro" class="col-sm-2 col-form-label">
+				Nome do Livro
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Livro" class="form-control" placeholder="Nome-Livro"
+						   @bind-Value="Livro.Name" />
+				<ValidationMessage For="() => Livro.Name" />
+			</div>
+			<label for="Sinopse-Livro" class="col-sm-2 col-form-label">
+				Sinópse do Livro
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Sinopse-Livro" class="form-control" placeholder="Sinopse-Livro"
+						   @bind-Value="Livro.Sinopse" />
+				<ValidationMessage For="() => Livro.Sinopse" />
+			</div>
+			<label for="Sobre-Livro" class="col-sm-2 col-form-label">
+				Sobre o Livro
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Sobre-Livro" class="form-control" placeholder="Sobre-Livro"
+						   @bind-Value="Livro.Sobre" />
+				<ValidationMessage For="() => Livro.Sobre" />
+			</div>
+			<div class="col-sm-10">
+				<select id="Autor-Livro" class="form-control" placeholder="Genero-Livro" @bind="autorId">
+					<option value="">Selecione um Autor</option>
+					@foreach (var autor in ListaAutores)
+					{
+						<option value="@autor.Id">@autor.Nome</option>
+					}
+				</select>
+				<ValidationMessage For="() => Livro.Autor" />
+			</div>
+			<div class="col-sm-10">
+				<select id="Genero-Livro" class="form-control" placeholder="Genero-Livro" @bind="generoId">
+					<option value="">Selecione um Gênero</option>
+					@foreach (var genero in ListaGeneros)
+					{
+						<option value="@genero.Id">@genero.Nome</option>
+					}
+				</select>
+				<ValidationMessage For="() => Livro.Genero" />
+			</div>
+			<div class="col-sm-10">
+				<select id="Midia-Livro" class="form-control" placeholder="Midia-Livro" @onchange="OnMudarImagem">
+					<option value="">Selecione uma Imagem</option>
+					@foreach (var midia in ListaMidia)
+					{
+						@if (midia.Id == midiaId)
+						{
+							<option value="@midia.Id" selected>@midia.Nome</option>
+						}
+						else
+						{
+							<option value="@midia.Id">@midia.Nome</option>
+						}
+					}
+				</select>
+				<ValidationMessage For="() => Livro.Midia" />
+			</div>
+
+			@if (Livro.Midia != null)
+			{
+				<div class="col-sm-10">
+					<img src="@Livro.Midia.MidiaLink" width="250" />
+				</div>
+			}
+
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+			<button type="button" class="btn btn-danger m-1" @onclick="DeleteLivro">Deletar</button>
+		</div>
+
+	</EditForm>
+
+	<ConfirmDialog @ref="DeleteConfirmation" ConfirmationChanged="ConfirmDelete_Click" ConfirmationMessage=@($"Deseja eliminar o Livro \"{Livro.Name}\"?")>
+	</ConfirmDialog>
+}
+
+@code {
+
+	public Livro? Livro { get; set; } = null;
+	protected ConfirmDialog DeleteConfirmation { get; set; } = new();
+	private IList<Autor> ListaAutores = new List<Autor>();
+	private Guid autorId;
+	private IList<Genero> ListaGeneros = new List<Genero>();
+	private Guid generoId;
+	private IList<Midia> ListaMidia = new List<Midia>();
+	private Guid midiaId;
+
+	[Parameter]
+	public required string Id { get; set; }
+
+	protected async override Task OnInitializedAsync()
+	{
+		ListaAutores = await AutorService.GetAllAutor();
+		ListaGeneros = await GeneroService.GetAllGeneros();
+		ListaMidia = await MidiaService.GetAllMidia();
+		Livro = await LivroService.GetLivroById(Guid.Parse(Id));
+
+		if (Livro != null && Livro.Genero != null)
+		{
+			generoId = Livro.Genero.Id;
+		}
+		if (Livro != null && Livro.Autor != null)
+		{
+			autorId = Livro.Autor.Id;
+		}
+		if (Livro != null && Livro.Midia != null)
+		{
+			midiaId = Livro.Midia.Id;
+		}
+	}
+
+	protected async Task OnMudarImagem(ChangeEventArgs e)
+	{
+		if (e != null && e.Value != null && Livro != null)
+		{
+			midiaId = Guid.Parse((string)e.Value);
+			Midia? midia = await MidiaService.GetMidiaById(midiaId);
+
+			Livro.Midia = midia;
+		}
+	}
+
+	private void Save()
+	{
+		if (Livro != null)
+		{
+			LivroService.UpdateLivro(Livro);
+			Navigation.NavigateTo("livros");
+		}
+	}
+
+	private void DeleteLivro()
+	{
+		DeleteConfirmation.Show();
+	}
+
+	protected async Task ConfirmDelete_Click(bool deleteConfirmed)
+	{
+		if (deleteConfirmed)
+		{
+			if (Livro != null)
+			{
+				await LivroService.DeleteLivro(Livro);
+				Navigation.NavigateTo("/livro");
+			}
+		}
+	}
+}

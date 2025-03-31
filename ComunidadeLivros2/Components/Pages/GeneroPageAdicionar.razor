@@ -1,0 +1,56 @@
+﻿@page "/adicionargenero"
+@inject IGeneroService GeneroService
+@inject NavigationManager Navigation
+
+<a href="/genero" class="btn btn-secondary m-1">Voltar</a>
+
+@if (NovoGenero == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@NovoGenero" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Adicionar Gênero</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Genero" class="col-sm-2 col-form-label">
+				Nome do Gênero
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Genero" class="form-control" placeholder="Nome-Genero"
+						   @bind-Value="NovoGenero.Nome" />
+				<ValidationMessage For="() => NovoGenero.Nome" />
+			</div>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+		</div>
+	</EditForm>
+}
+
+@code {
+	public Genero? NovoGenero { get; set; } = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		NovoGenero = new Genero()
+			{
+				Id = Guid.NewGuid(),
+				Nome = string.Empty
+			};
+
+		await Task.Delay(5);
+	}
+
+	private void Save()
+	{
+		if (NovoGenero != null)
+		{
+			GeneroService.AddGenero(NovoGenero);
+			Navigation.NavigateTo("genero");
+		}
+	}
+}

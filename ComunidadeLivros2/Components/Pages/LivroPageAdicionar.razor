@@ -1,0 +1,159 @@
+﻿@page "/adicionarlivro"
+@inject ILivroService LivroService
+@inject IGeneroService GeneroService
+@inject IMidiaService MidiaService
+@inject IAutorService AutorService
+@inject NavigationManager Navigation
+
+<a href="/livro" class="btn btn-secondary m-1">Voltar</a>
+
+@if (NovoLivro == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@NovoLivro" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Adicionar Livro</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Livro" class="col-sm-2 col-form-label">
+				Nome do Título
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Livro" class="form-control" placeholder="Nome-Livro"
+					@bind-Value="NovoLivro.Name" />
+				<ValidationMessage For="() => NovoLivro.Name" />
+			</div>
+			<label for="Sinopse-Livro" class="col-sm-2 col-form-label">
+				Sinopse do Livro
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Sinopse-Livro" class="form-control" placeholder="Sinopse-Livro"
+				@bind-Value="NovoLivro.Sinopse" />
+				<ValidationMessage For="() => NovoLivro.Sinopse" />
+			</div>
+			<label for="Sobre-Livro" class="col-sm-2 col-form-label">
+				Sobre o Livro
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Sobre-Livro" class="form-control" placeholder="Sobre-Livro"
+				@bind-Value="NovoLivro.Sobre" />
+				<ValidationMessage For="() => NovoLivro.Sobre" />
+			</div>
+			<label for="Genero" class="col-sm-2 col-form-label">
+				Genero do Livro
+			</label>
+			<div class="col-sm-10">
+				<select id="Genero" class="form-control" @bind="generoId">
+					<option value="">Selecione um Gênero</option>
+					@foreach (var genero in ListaGeneros)
+					{
+						<option value="@genero.Id">@genero.Nome</option>
+					}
+				</select>
+				@* <ValidationMessage For="() => NovoAutor.GeneroId" /> *@
+			</div>
+			<div class="col-sm-10">
+				<label for="Autor" class="col-sm-2 col-form-label">
+					Autor do Livro
+				</label>
+				<div class="col-sm-10">
+					<select id="Livro" class="form-control" @bind="autorId">
+						<option value="">Selecione um Autor</option>
+						@foreach (var autor in ListaAutores)
+						{
+							<option value="@autor.Id">@autor.Nome</option>
+						}
+					</select>
+					@* <ValidationMessage For="() => NovoLivro.AutorId" /> *@
+				</div>
+			</div>
+			<div>
+				<label for="Midia" class="col-sm-2 col-form-label">
+					Imagem do Livro
+				</label>
+				<div class="col-sm-10">
+					<div class="col-sm-10">
+						<select id="Midia-Livro" class="form-control" placeholder="Midia-Livro" @onchange="OnMudarImagem">
+							<option value="">Selecione uma Imagem</option>
+							@foreach (var midia in ListaMidias)
+							{
+								@if (midia.Id == midiaId)
+								{
+									<option value="@midia.Id" selected>@midia.Nome</option>
+								}
+								else
+								{
+									<option value="@midia.Id">@midia.Nome</option>
+								}
+							}
+						</select>
+						<ValidationMessage For="() => NovoLivro.Midia" />
+					</div>
+
+					@if (NovoLivro.Midia != null)
+					{
+						<div class="col-sm-10">
+							<img src="@NovoLivro.Midia.MidiaLink" width="250" />
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+		</div>
+	</EditForm>
+}
+
+@code {
+	public Livro? NovoLivro { get; set; } = null;
+	private IList<Genero> ListaGeneros = new List<Genero>();
+	private Guid generoId;
+	private IList<Autor> ListaAutores = new List<Autor>();
+	private Guid autorId;
+	private IList<Midia> ListaMidias = new List<Midia>();
+	private Guid midiaId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		ListaGeneros = await GeneroService.GetAllGeneros();
+		ListaAutores = await AutorService.GetAllAutor();
+		ListaMidias = await MidiaService.GetAllMidia();
+
+		NovoLivro = new Livro()
+		{
+			Id = Guid.NewGuid(),
+			Name = string.Empty,
+			Sinopse = string.Empty,
+			Sobre = string.Empty
+		};
+	}
+
+	protected async Task OnMudarImagem(ChangeEventArgs e)
+	{
+		if (e != null && e.Value != null && NovoLivro != null)
+		{
+			midiaId = Guid.Parse((string)e.Value);
+			Midia? midia = await MidiaService.GetMidiaById(midiaId);
+
+			NovoLivro.Midia = midia;
+		}
+	}
+
+	private async void Save()
+	{
+		if (NovoLivro != null)
+		{
+			NovoLivro.Genero = await GeneroService.GetGeneroById(generoId);
+			NovoLivro.Autor = await AutorService.GetAutorById(autorId);
+			NovoLivro.Midia = await MidiaService.GetMidiaById(midiaId);
+
+			await LivroService.AddLivro(NovoLivro);
+			Navigation.NavigateTo("livro");
+		}
+	}
+}

@@ -1,0 +1,78 @@
+﻿@page "/editmidia/{id}"
+
+@inject IMidiaService MidiaService
+@inject NavigationManager Navigation
+
+<a href="/midia" class="btn btn-secondary m-1">Voltar</a>
+
+@if (Midia == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@Midia" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Editar Mídia</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Midia" class="col-sm-2 col-form-label">
+				Nome da Mídia
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Midia" class="form-control" placeholder="Nome-"
+						   @bind-Value="Midia.Nome" />
+				<ValidationMessage For="() => Midia.Nome" />
+			</div>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+			<button type="button" class="btn btn-danger m-1" @onclick="DeleteMidia">Deletar</button>
+		</div>
+
+	</EditForm>
+
+	<ConfirmDialog @ref="DeleteConfirmation" ConfirmationChanged="ConfirmDelete_Click" ConfirmationMessage=@($"Deseja eliminar a Mídia? \"{Midia.Nome}\"?")>
+	</ConfirmDialog>
+}
+
+@code {
+
+	public Midia? Midia { get; set; } = null;
+	protected ConfirmDialog DeleteConfirmation { get; set; } = new();
+
+	[Parameter]
+	public required string Id { get; set; }
+
+	protected async override Task OnInitializedAsync()
+	{
+		Midia = await MidiaService.GetMidiaById(Guid.Parse(Id));
+	}
+
+	private void Save()
+	{
+		if (Midia != null)
+		{
+			MidiaService.UpdateMidia(Midia);
+			Navigation.NavigateTo("midias");
+		}
+	}
+
+	private void DeleteMidia()
+	{
+		DeleteConfirmation.Show();
+	}
+
+	protected async Task ConfirmDelete_Click(bool deleteConfirmed)
+	{
+		if (deleteConfirmed)
+		{
+			if (Midia != null)
+			{
+				await MidiaService.DeleteMidia(Midia);
+				Navigation.NavigateTo("/midia");
+			}
+		}
+	}
+}

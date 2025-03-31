@@ -1,0 +1,39 @@
+﻿@page "/configuracoes"
+@* @inject IConfiguracaoService ConfiguracaoService *@
+
+<PageTitle>Configurações</PageTitle>
+
+<h1>Configurações</h1> 
+
+<div>
+    @* <@ThemeSwitcher OnThemeChanged="OnThemeChanged" /> *@
+
+    @* <p>Tema Atual: @temaAtual</p> *@
+</div>
+<br />
+
+@code {
+    // private string temaAtual = "";
+
+    // protected override void OnInitialized()
+    // {
+    //     temaAtual = ConfiguracaoService.TemaAtual;
+    //     ConfiguracaoService.RegistrarCallback(AtualizarTema);
+    // }
+
+    // private void OnThemeChanged(string themeName)
+    // {
+    //     ConfiguracaoService.AlterarTema(themeName);
+    // }
+
+    // private void AtualizarTema(string novoTema)
+    // {
+    //     temaAtual = novoTema;
+    //     InvokeAsync(StateHasChanged); 
+    // }
+
+    // public void Dispose()
+    // {
+    //     ConfiguracaoService.RemoverCallback(AtualizarTema);
+    // }
+}

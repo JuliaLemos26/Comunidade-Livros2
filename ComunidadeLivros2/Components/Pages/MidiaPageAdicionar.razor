@@ -1,0 +1,89 @@
+﻿@page "/adicionarmidia"
+@inject IMidiaService MidiaService
+@inject NavigationManager Navigation
+
+<a href="/midia" class="btn btn-secondary m-1">Voltar</a>
+
+@if (NovaMidia == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@NovaMidia" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Adicionar Midia</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Midia" class="col-sm-2 col-form-label">
+				Nome da Midia
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Midia" class="form-control" placeholder="Nome-Midia"
+						   @bind-Value="NovaMidia.Nome" />
+				<ValidationMessage For="() => NovaMidia.Nome" />
+			</div>
+			<br />
+			<label for="MidiaLink-Midia" class="col-sm-2 col-form-label">
+				Adicione o link da imagem desejada
+			</label>
+			<div class="col-sm-10">
+				<InputText id="MidiaLink-Midia" class="form-control" placeholder="MidiaLink-Midia"
+						   @bind-Value="NovaMidia.MidiaLink" />
+				<ValidationMessage For="() => NovaMidia.MidiaLink" />
+			</div>
+			<br />
+			@if (!string.IsNullOrEmpty(NovaMidia.MidiaLink))
+			{
+				<img src="@NovaMidia.MidiaLink" alt="Pré-visualização da imagem"
+					 style="max-width: 200px; max-height: 200px; margin-top: 10px;" />
+			}
+			@*@if (!string.IsNullOrWhiteSpace(NovaMidia.MidiaLink))
+			{
+				<div class="col-sm-10">
+					<img src="@NovaMidia.MidiaLink" width="250" />
+				</div>
+			}*@
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+		</div>
+	</EditForm>
+}
+
+@code {
+	public Midia? NovaMidia { get; set; } = null;
+	private string ValidationMessage { get; set; } = "Espere...";
+	private string ValidationClass { get; set; } = "text-warning";
+
+	protected override async Task OnInitializedAsync()
+	{
+		NovaMidia = new Midia()
+		{
+			Id = Guid.NewGuid(),
+			Nome = string.Empty,
+			MidiaLink = string.Empty
+		};
+
+		await Task.Delay(5);
+	}
+
+	private async void Save()
+	{
+		if (NovaMidia != null && !string.IsNullOrEmpty(NovaMidia.MidiaLink))
+		{
+			await MidiaService.AddMidia(NovaMidia);
+			Navigation.NavigateTo("midia");
+		}
+	}
+
+	//private void Save()
+	//{
+		//if (NovaMidia != null)
+		//{
+			//MidiaService.AddMidia(NovaMidia);
+			//Navigation.NavigateTo("midia");
+		//}
+	//}
+}

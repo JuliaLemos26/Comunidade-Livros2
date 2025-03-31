@@ -1,0 +1,52 @@
+﻿@page "/livro"
+@inject ILivroService LivroService
+
+<PageTitle>Livros</PageTitle>
+
+<h1>Títulos</h1>
+
+<a href="@($"adicionarlivro")" class="btn btn-primary m-1">Adicionar Título</a>
+<br />
+<br />
+
+<p>Listagem de Títulos</p>
+
+@if (livros == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome</th>
+				<th>Genero</th>
+				<th>Autor</th>
+				<th>Ações</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var livro in livros)
+			{
+				<tr>
+					<td>@livro.Name</td>
+					<td>@(livro.Genero != null ? livro.Genero.Nome : "")</td>
+					<td>@(livro.Autor != null ? livro.Autor.Nome : "")</td>
+					<td>
+						<a href="@($"editlivro/{livro.Id}")" class="btn btn-primary m-1">Editar</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private IList<Livro>? livros;
+
+	protected override async Task OnInitializedAsync()
+	{
+		livros = await LivroService.GetAllLivro();
+	}
+}

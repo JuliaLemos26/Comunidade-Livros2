@@ -1,0 +1,31 @@
+﻿@page "/autor/info/{id}"
+@inject IAutorService AutorService
+
+<h3>@Autor?.Nome</h3>
+<br />
+@if (Autor != null)
+{
+    <img src="@Autor.Midia?.MidiaLink" alt="@Autor.Nome" width="300" />
+    <br />
+    <p>Sobre: @Autor.Sobre</p>
+
+    <p>Lista de Livros: <a href="/autor/livros/@Livro.AutorId">@Livro.Autor?.Nome</a></p>
+}
+else
+{
+    <p>Carregando...</p>
+}
+
+@code {
+    [Parameter]
+    public required string Id { get; set; }
+    private Autor? Autor = null;
+    private Livro? Livro = null;
+
+    //protected override async Task OnInitializedAsync() => Livro = await LivroService.GetLivroById(Id);
+
+    protected override async Task OnInitializedAsync()
+    {
+        Autor = await AutorService.GetAutorById(Guid.Parse(Id));
+    }
+}

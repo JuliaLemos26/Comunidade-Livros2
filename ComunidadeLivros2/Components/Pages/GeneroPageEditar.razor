@@ -1,0 +1,78 @@
+﻿@page "/editgenero/{id}"
+
+@inject IGeneroService GeneroService
+@inject NavigationManager Navigation
+
+<a href="/genero" class="btn btn-secondary m-1">Voltar</a>
+
+@if (Genero == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<EditForm Model="@Genero" OnValidSubmit="Save">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<h3>Editar Gênero</h3>
+		<hr />
+		<div class="form-group row">
+			<label for="Nome-Genero" class="col-sm-2 col-form-label">
+				Nome do Gênero
+			</label>
+			<div class="col-sm-10">
+				<InputText id="Nome-Genero" class="form-control" placeholder="Nome-Genero"
+						   @bind-Value="Genero.Nome" />
+				<ValidationMessage For="() => Genero.Nome" />
+			</div>
+		</div>
+		<div>
+			<button type="submit" class="btn btn-outline-success m-1">Gravar</button>
+			<button type="button" class="btn btn-danger m-1" @onclick="DeleteGenero">Deletar</button>
+		</div>
+
+	</EditForm>
+
+	<ConfirmDialog @ref="DeleteConfirmation" ConfirmationChanged="ConfirmDelete_Click" ConfirmationMessage=@($"Deseja eliminar o género \"{Genero.Nome}\"?")>
+	</ConfirmDialog>
+}
+
+@code {
+
+	public Genero? Genero { get; set; } = null;
+	protected ConfirmDialog DeleteConfirmation { get; set; } = new();
+
+	[Parameter]
+	public required string Id { get; set; }
+
+	protected async override Task OnInitializedAsync()
+	{
+		Genero = await GeneroService.GetGeneroById(Guid.Parse(Id));
+	}
+
+	private void Save()
+	{
+		if (Genero != null)
+		{
+			GeneroService.UpdateGenero(Genero);
+			Navigation.NavigateTo("genero");
+		}
+	}
+
+	private void DeleteGenero()
+	{
+		DeleteConfirmation.Show();
+	}
+
+	protected async Task ConfirmDelete_Click(bool deleteConfirmed)
+	{
+		if (deleteConfirmed)
+		{
+			if (Genero != null)
+			{
+				await GeneroService.DeleteGenero(Genero);
+				Navigation.NavigateTo("/genero");
+			}
+		}
+	}
+}

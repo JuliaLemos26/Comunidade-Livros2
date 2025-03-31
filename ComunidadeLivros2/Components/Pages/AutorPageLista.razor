@@ -1,0 +1,50 @@
+﻿@page "/autor"
+@inject IAutorService AutorService
+
+<PageTitle>Autor</PageTitle>
+
+<h1>Autores</h1>
+
+<a href="@($"adicionarautor")" class="btn btn-primary m-1">Adicionar Autor</a>
+<br />
+<br />
+
+<p>Listagem de Autores</p>
+
+@if (autor == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome</th>
+				<th>Genero</th>
+				<th>Ações</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var autor in autor)
+			{
+				<tr>
+					<td>@autor.Nome</td>
+					<td>@(autor.Genero != null ? autor.Genero.Nome : "")</td>
+					<td>
+						<a href="@($"editautor/{autor.Id}")" class="btn btn-primary m-1">Editar</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private IList<Autor>? autor;
+
+	protected override async Task OnInitializedAsync()
+	{
+		autor = await AutorService.GetAllAutor();
+	}
+}

@@ -1,0 +1,49 @@
+﻿@page "/midia"
+@inject IMidiaService MidiaService
+
+<PageTitle>Mídia</PageTitle>
+
+<h1>Mídia</h1>
+
+<a href="@($"adicionarmidia")" class="btn btn-primary m-1">Adicionar Mídia</a>
+<br />
+<br />
+
+<p>Listagem de Mídia</p>
+
+
+@if (midia == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Nome</th>
+				<th>Ações</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var Midia in midia)
+			{
+				<tr>
+					<td>@Midia.Nome</td>
+					<td>
+						<a href="@($"editmidia/{Midia.Id}")" class="btn btn-primary m-1">Editar</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private IList<Midia>? midia;
+
+	protected override async Task OnInitializedAsync()
+	{
+		midia = await MidiaService.GetAllMidia();
+	}
+}

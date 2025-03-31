@@ -1,0 +1,94 @@
+﻿@page "/pesquisar"
+@inject ILivroService LivroService
+
+<PageTitle>Pesquisar</PageTitle>
+<h3>Pesquisar</h3>
+
+<div class="text-center bg-blue-100">
+	<input type="text" class="border-4 w-1/3 rounded m-6 p-6 h-8 border-blue-300"
+		   @bind-value="SearchText"
+		   @bind-value:event="oninput"
+		   @onkeyup="SearchChanged"
+		   placeholder="Pesquise por título" />
+</div>
+
+@if (!LivroList.Any())
+{
+	<p>Carregando...</p>
+}
+else
+{
+	<div class="p-2 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+		@foreach (var livro in LivroList)
+		{
+			<div class="border p-4 rounded shadow-lg">
+				@*<h2 class="text-xl font-bold" href="/livro/info/@livro.Id">@livro.Name</h2> 
+					class="border p-4 rounded shadow-lg"*@
+				<a href="/livro/info/@livro.Id" class="text-xl font-bold">
+					<h2>@livro.Name</h2>
+				</a>
+			</div>
+		}
+	</div>
+
+	<div class="flex justify-center mt-4 space-x-2">
+		<button class="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+				@onclick="PreviousPage"
+				disabled="@(currentPageNumber == 1)">
+			Anterior
+		</button>
+
+		<span>Página @currentPageNumber de @totalPages</span>
+
+		<button class="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+				@onclick="NextPage"
+				disabled="@(currentPageNumber == totalPages)">
+			Próxima
+		</button>
+	</div>
+}
+
+@code {
+	private string SearchText { get; set; } = "";
+	private IList<Livro> LivroList { get; set; } = new List<Livro>();
+
+	private int currentPageNumber = 1;
+	private int totalPages = 1;
+	private int pageSize = 10; 
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadLivrosAsync();
+	}
+
+	private async Task LoadLivrosAsync()
+	{
+		var (livros, totalLivros) = await LivroService.GetLivrosFilteredPaged(SearchText, currentPageNumber, pageSize);
+		LivroList = livros;
+		totalPages = (int)Math.Ceiling(totalLivros / (double)pageSize);
+	}
+
+	private async Task SearchChanged()
+	{
+		currentPageNumber = 1; 
+		await LoadLivrosAsync();
+	}
+
+	private async Task NextPage()
+	{
+		if (currentPageNumber < totalPages)
+		{
+			currentPageNumber++;
+			await LoadLivrosAsync();
+		}
+	}
+
+	private async Task PreviousPage()
+	{
+		if (currentPageNumber > 1)
+		{
+			currentPageNumber--;
+			await LoadLivrosAsync();
+		}
+	}
+}
