@@ -19,5 +19,7 @@ namespace ComunidadeLivros2.Data.Models
 
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public Midia? Midia { get; set; }
+
+        public List<ApplicationUser> UsuariosFavoritos { get; set; } = new();
     }
 }

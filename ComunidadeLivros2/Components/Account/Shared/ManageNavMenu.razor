@@ -5,15 +5,19 @@
 
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
+        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Perfil</NavLink>
     </li>
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
     </li>
     <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
+        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Senha</NavLink>
     </li>
-    @if (hasExternalLogins)
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Favoritos">Favoritos</NavLink>
+    </li>
+
+    @*@if (hasExternalLogins)
     {
         <li class="nav-item">
             <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
@@ -24,7 +28,7 @@
     </li>
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
-    </li>
+    </li>*@
 </ul>
 
 @code {

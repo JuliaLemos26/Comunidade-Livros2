@@ -1,30 +1,76 @@
 ﻿@page "/livro/info/{id}"
+@using Microsoft.AspNetCore.Identity
+@using ComunidadeLivros2.Data
+@using System.Security.Claims
+@using ComunidadeLivros2.Components.Account
 @inject ILivroService LivroService
+@inject IFavoritosService FavoritosService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityUserAccessor UserAccessor
+
+@rendermode InteractiveServer
 
 <h3>@Livro?.Name</h3>
 <br />
 @if (Livro != null)
 {
-    <img src="@Livro.Midia?.MidiaLink" alt="@Livro.Name" width="300" />
-    <br />
-    <p>@Livro.Sinopse</p>
-    <p>Sobre: @Livro.Sobre</p>
-    <p>Autor: <a href="/autor/info/@Livro.Autor?.Id">@Livro.Autor?.Nome</a></p>
+	<img src="@Livro.Midia?.MidiaLink" alt="@Livro.Name" width="300" />
+	<br />
+	<p>@Livro.Sinopse</p>
+	<p>Sobre: @Livro.Sobre</p>
+	<p>Autor: <a href="/autor/info/@Livro.Autor?.Id">@Livro.Autor?.Nome</a></p>
+	<br />
+	<button class="px-4 py-2 bg-blue-500 rounded disabled:opacity-50"
+	@onclick="SaveFavorite">Salvar na Minha Lista</button>
 }
 else
 {
-    <p>Carregando...</p>
+	<p>Carregando...</p>
 }
 
 @code {
-    [Parameter]
-    public required string Id { get; set; }
-    private Livro? Livro = null;
+	[Parameter] 
+	public required string Id { get; set; }
 
-    //protected override async Task OnInitializedAsync() => Livro = await LivroService.GetLivroById(Id);
+	private ApplicationUser? user = null;
+	private Livro? Livro = null;
 
-    protected override async Task OnInitializedAsync()
-    {
-        Livro = await LivroService.GetLivroById(Guid.Parse(Id));
-    }
+	[CascadingParameter]
+	private string? UserId { get; set; } = default!;
+
+	[CascadingParameter]
+	private HttpContext HttpContext { get; set; } = default!;
+
+	protected override async Task OnInitializedAsync()
+	{
+		user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+		Livro = await LivroService.GetLivroById(Guid.Parse(Id));
+		if (UserManager != null && HttpContext != null && HttpContext.User != null)
+		{
+			UserId = UserManager.GetUserId(HttpContext.User);
+		}
+	}
+
+	private async void SaveFavorite()
+	{
+		await Task.Delay(10);
+
+
+
+		// if (UserManager != null && HttpContext != null && HttpContext.User != null)
+		// {
+		// 	UserId = UserManager.GetUserId(HttpContext.User);
+		// }
+
+		// if (UserManager != null && UserId != null)
+		// {
+		// 	var user = await UserManager.FindByIdAsync(UserId);
+
+		// 	if (user != null)
+		// 	{
+		// 		FavoritosService.AddFavorite(user, Guid.Parse(Id));
+		// 	}
+		// }
+	}
 }

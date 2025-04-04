@@ -20,11 +20,14 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IGeneroService, GeneroService>();
 builder.Services.AddScoped<IMidiaService, MidiaService>();
 builder.Services.AddScoped<IAutorService, AutorService>();
 builder.Services.AddScoped<ILivroService, LivroService>();
+builder.Services.AddScoped<IFavoritosService, FavoritosService>();
+
 
 builder.Services.AddAuthentication(options =>
     {
